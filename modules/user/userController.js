@@ -64,3 +64,35 @@ exports.logout = (req, res) => {
         res.redirect('/');
     });
 };
+exports.getProfile = async (userId) => {
+    try {
+        const user = await User.findByPk(userId, {
+            attributes: [ 'id', 'username', 'email', 'fullName', 'bio', 'profilePicture']
+        });
+        return user;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Erro ao buscar perfil do usuário.');
+    }
+};
+exports.updateProfile = async(req, res) => {
+    try {
+        const { fullname, bio } = req.body;
+        const userId = req.session.user.id;
+
+        const updateData = { fullname, bio }
+
+        if(req.file){
+            updateData.porfilePicture = req.file.filename;
+        }
+
+        await User.update(updateData, { where: { id: userId } });
+
+        req.flash('sucess', 'Perfil atualizado com sucesso!');
+        res.redirect('/profile.edit');
+    } catch (error) {
+        console.error(error);
+        req.flash('error', 'Erro ao atualizar perfil.');
+        res.redirect('/profile/edit');
+    }
+}
