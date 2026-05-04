@@ -1,5 +1,7 @@
 const User = require('./userModel');
 const bcrypt = require('bcryptjs');
+const fs = require("fs");
+const path = require("path");
 
 exports.register = async (req, res) => {
     const{ username, email, password, confirmPassword, fullname } = req.body;
@@ -35,22 +37,18 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const{ login, password } = req.body;
-        
         const user = await User.findOne({
             where: {
                 [require('sequelize').Op.or]: [{email: login},{username: login}]
             }
         });
-
         if (!user || !(await bcrypt.compare(password, user.password))) {
-            req.flash('error', 'E-mail/Usuário ou senha incoretos');
+            req.flash('error', 'E-mail/Usuário ou senha incorretos');
             return res.redirect('/login');
         }
-        req.session.user = {
-            id: user.id,
-            username: user.username,
-            email: user.email
-        };
+        const userData = await this.getProfile(user.id);
+        req.session.user = userData;
+
         res.redirect('/feed');
     }catch (error) {
         console.error(error);
@@ -83,13 +81,23 @@ exports.updateProfile = async(req, res) => {
         const updateData = { fullname, bio }
 
         if(req.file){
-            updateData.porfilePicture = req.file.filename;
+            updateData.profilePicture = req.file.filename;
         }
+        const oldUser = await User.findByPk(userId);
 
         await User.update(updateData, { where: { id: userId } });
+        if(req.file && oldUser.profilePicture !== 'default-profile.png') {
+            const oldProfilePicPath = path.join(__dirname,'../../public/uploads/profiles', oldUser.profilePicture);
+            fs.unlink(oldProfilePicPath, (err) => {
+                if(err) console.error('Erro ao apagar foto de perfil antiga:', err);
+                else console.log('Foto de perfil antiga apgada com sucesso:', oldProfilePicPath);   
+            });
+        }
+        const userData = await this.getProfile(userId);
+        req.session.user = userData;
 
         req.flash('sucess', 'Perfil atualizado com sucesso!');
-        res.redirect('/profile.edit');
+        res.redirect('/profile/edit');
     } catch (error) {
         console.error(error);
         req.flash('error', 'Erro ao atualizar perfil.');

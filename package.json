@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev":"node --watch ./bin/www",
+    "dev": "node --watch ./bin/www",
     "start": "node ./bin/www"
   },
   "dependencies": {
@@ -14,6 +14,7 @@
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^4.22.1",
+    "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
     "http-errors": "~1.6.3",
     "morgan": "^1.10.1",
