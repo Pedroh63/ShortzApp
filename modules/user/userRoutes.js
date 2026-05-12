@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const authMiddleware = require('../../middlewares/auth');
-const upload = require('../../middlewares/multer')
+const upload = require('../../middlewares/profileMulter');
 const userController = require('../../modules/user/userController');
 
 // Rota para exibir o formulário de cadastro

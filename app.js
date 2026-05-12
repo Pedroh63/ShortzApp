@@ -1,17 +1,19 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
 const session = require("express-session");
 const flash = require("connect-flash");
 
-var indexRouter = require('./routes/index');
-var userRoutes = require('./modules/user/userRoutes');
+const indexRouter = require('./routes/index');
+const userRoutes = require('./modules/user/userRoutes');
+var videoRoutes = require("./modules/video/videoRoutes");
 
-var app = express();
-var expressLayout = require("express-ejs-layouts");
+const app = express();
+const expressLayout = require("express-ejs-layouts");
+
 
 // view engine setup
 app.set("views", path.join(__dirname, "views/pages"));         
@@ -37,8 +39,9 @@ app.use((req, res, next) => {
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use(indexRouter);
 app.use(userRoutes);
+app.use(videoRoutes);
 
  
 
@@ -59,6 +62,7 @@ app.use(function(err, req, res, next) {
 });
 const sequelize = require('./config/database.js');
 const user = require('./modules/user/userModel.js');
+const video = require ("./modules/video/videoModel");
 sequelize.sync({ alter: true })
   .then(() => console.log('Banco de dados sincronizado!'))
   .catch(err => console.error('Erro ao sincronizar banco:', err));
